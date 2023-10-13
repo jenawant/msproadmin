@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Setting\Service;
 
 use Hyperf\Config\Annotation\Value;
-use Hyperf\Utils\Collection;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Collection\Collection;
+use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\Abstracts\AbstractService;
 use MsPro\Annotation\DependProxy;
 use MsPro\Generator\ModuleGenerator;

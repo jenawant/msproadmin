@@ -7,7 +7,7 @@ use App\Setting\Mapper\SettingGenerateTablesMapper;
 use App\Setting\Model\SettingGenerateTables;
 use App\System\Service\DataMaintainService;
 use Hyperf\DbConnection\Db;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\Abstracts\AbstractService;
 use MsPro\Annotation\Transaction;
 use MsPro\Exception\MsProException;
@@ -19,8 +19,7 @@ use MsPro\Generator\ModelGenerator;
 use MsPro\Generator\RequestGenerator;
 use MsPro\Generator\ServiceGenerator;
 use MsPro\Generator\SqlGenerator;
-use MsPro\Generator\VueIndexGenerator;
-use MsPro\Generator\VueSaveGenerator;
+use MsPro\Generator\ReactIndexGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -100,6 +99,10 @@ class SettingGenerateTablesService extends AbstractService
         try {
             Db::beginTransaction();
             foreach ($params['names'] as $item) {
+                // 加载过就忽略.ADD.JENA.20221230
+                if ($this->mapper->model::where('table_name', $item['name'])->count()){
+                    continue;
+                }
                 $tableInfo = [
                     'table_name' => $item['name'],
                     'table_comment' => $item['comment'],
@@ -222,7 +225,7 @@ class SettingGenerateTablesService extends AbstractService
             MapperGenerator::class,
             RequestGenerator::class,
             ApiGenerator::class,
-            VueIndexGenerator::class,
+            ReactIndexGenerator::class,
             SqlGenerator::class,
             DtoGenerator::class,
         ];
@@ -380,10 +383,10 @@ class SettingGenerateTablesService extends AbstractService
                 'lang' => 'javascript',
             ],
             [
-                'tab_name' => 'Index.vue',
-                'name' => 'index',
-                'code' => make(VueIndexGenerator::class)->setGenInfo($model)->preview(),
-                'lang' => 'html',
+                'tab_name' => 'Index.tsx',
+                'name' => 'react',
+                'code' => make(ReactIndexGenerator::class)->setGenInfo($model)->preview(),
+                'lang' => 'javascript',
             ],
             [
                 'tab_name' => 'Menu.sql',
