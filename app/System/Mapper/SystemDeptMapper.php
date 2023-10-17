@@ -169,6 +169,10 @@ class SystemDeptMapper extends AbstractMapper
                 [ $params['created_at'][0] . ' 00:00:00', $params['created_at'][1] . ' 23:59:59' ]
             );
         }
+        // 指定关系数据.ADD.JENA.20230322
+        if (isset($params['withRelation']) && $params['withRelation'] !== '') {
+            $query->with(explode('#', $params['withRelation']));
+        }
         return $query;
     }
 }

@@ -1,10 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 namespace App\System\Service;
 
 
 use App\System\Mapper\SystemDeptMapper;
+use Hyperf\Di\Annotation\Inject;
 use MsPro\Abstracts\AbstractService;
 use MsPro\Exception\NormalStatusException;
 
@@ -14,6 +16,9 @@ class SystemDeptService extends AbstractService
      * @var SystemDeptMapper
      */
     public $mapper;
+
+    #[Inject]
+    public SystemUserService $userService;
 
     public function __construct(SystemDeptMapper $mapper)
     {
@@ -50,9 +55,9 @@ class SystemDeptService extends AbstractService
     {
         $users = [];
         foreach ($data['users'] as $item) {
-            $users[] = array_merge(['created_at' => date('Y-m-d H:i:s')], $item);
+            $users[] = array_merge(['created_at' => date('Y-m-d H:i:s')], ['user_id' => $item, 'username' => $this->userService->read($item, ['username'])->username]);
         }
-        return $this->mapper->addLeader((int) $data['id'], $users);
+        return $this->mapper->addLeader((int)$data['id'], $users);
     }
 
     /**
@@ -64,9 +69,9 @@ class SystemDeptService extends AbstractService
     {
         $users = [];
         foreach ($data['ids'] as $id) {
-            $users[] = [ 'user_id' => $id ];
+            $users[] = ['user_id' => $id];
         }
-        return $this->mapper->delLeader((int) $data['id'], $users);
+        return $this->mapper->delLeader((int)$data['id'], $users);
     }
 
     /**
@@ -87,7 +92,12 @@ class SystemDeptService extends AbstractService
      */
     public function save(array $data): int
     {
-        return $this->mapper->save($this->handleData($data));
+        $leaders = $data['leaders'];
+        unset($data['leaders']);
+        $dept_id = $this->mapper->save($this->handleData($data));
+        $this->addLeader(['id' => $dept_id, 'users' => $leaders]);
+
+        return $dept_id;
     }
 
     /**
@@ -100,7 +110,9 @@ class SystemDeptService extends AbstractService
      */
     public function update(int $id, array $data): bool
     {
-        return $this->mapper->update($id, $this->handleData($data));
+        $leaders = $data['leaders'];
+        unset($data['leaders']);
+        return $this->mapper->update($id, $this->handleData($data)) && $this->addLeader(['id' => $id, 'users' => $leaders]);
     }
 
     /**
@@ -137,7 +149,7 @@ class SystemDeptService extends AbstractService
         // 跳过的部门
         $ctuIds = [];
         if (count($ids)) foreach ($ids as $id) {
-            if (!$this->checkChildrenExists( (int) $id)) {
+            if (!$this->checkChildrenExists((int)$id)) {
                 $this->mapper->realDelete([$id]);
             } else {
                 $ctuIds[] = $id;

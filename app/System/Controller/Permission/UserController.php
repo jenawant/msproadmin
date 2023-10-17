@@ -42,6 +42,18 @@ class UserController extends MsProController
     }
 
     /**
+     * 无分页列表
+     * @return ResponseInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    #[GetMapping("option"), Permission("system:user, system:user:index")]
+    public function option(): ResponseInterface
+    {
+        return $this->success($this->service->getList($this->request->all(), false));
+    }
+
+    /**
      * 回收站列表
      * @return ResponseInterface
      * @throws \Psr\Container\ContainerExceptionInterface
