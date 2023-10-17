@@ -4266,16 +4266,16 @@
         },
         {
             "name": "jenawant/mspro-core",
-            "version": "v1.0.7",
+            "version": "v1.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jenawant/mspro-core.git",
-                "reference": "fe57bc24406ddd8a648329bca2e73587741b29fc"
+                "reference": "b484247c3c0d46efb2a335ed4cea7550fe6d08e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jenawant/mspro-core/zipball/fe57bc24406ddd8a648329bca2e73587741b29fc",
-                "reference": "fe57bc24406ddd8a648329bca2e73587741b29fc",
+                "url": "https://api.github.com/repos/jenawant/mspro-core/zipball/b484247c3c0d46efb2a335ed4cea7550fe6d08e3",
+                "reference": "b484247c3c0d46efb2a335ed4cea7550fe6d08e3",
                 "shasum": ""
             },
             "require": {
@@ -4365,9 +4365,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jenawant/mspro-core/issues",
-                "source": "https://github.com/jenawant/mspro-core/tree/v1.0.7"
+                "source": "https://github.com/jenawant/mspro-core/tree/v1.0.8"
             },
-            "time": "2023-10-13T03:29:12+00:00"
+            "time": "2023-10-14T15:10:46+00:00"
         },
         {
             "name": "jenawant/mspro-mail",
@@ -11863,5 +11863,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.6.0"
 }
