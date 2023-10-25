@@ -232,6 +232,36 @@ class UserController extends MsProController
     }
 
     /**
+     * 异步数据导出
+     * @description 生成.zip格式文件，需配合asyncDownload方法使用
+     * @return ResponseInterface
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    #[PostMapping("asyncExport"), Permission("system:user:export"), OperationLog]
+    public function asyncExport(): ResponseInterface
+    {
+        $filename = 'ExportDataList-' . date('Ymd') . '-' . snowflake_id();
+        $this->service->asyncExport($this->request->all(), \App\System\Dto\UserDto::class, $filename);
+        return $this->success('已加入导出队列，请稍后', ['filename' => $filename]);
+    }
+
+    /**
+     * 下载异步导出的文件
+     * @description 输出.zip格式文件，前端定时携带filename参数请求该接口，若异步导出完成，则下载文件
+     * @return ResponseInterface
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    #[GetMapping("asyncDownload"), Permission("system:user:export")]
+    public function asyncDownload(): ResponseInterface
+    {
+        return $this->service->asyncDownload($this->request->input('filename'));
+    }
+
+    /**
      * 用户导入
      * @return ResponseInterface
      * @throws \Psr\Container\ContainerExceptionInterface
