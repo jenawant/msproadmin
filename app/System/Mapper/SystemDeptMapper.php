@@ -39,7 +39,7 @@ class SystemDeptMapper extends AbstractMapper
 
         $deptTree = (new MsProCollection())->toTree($treeData, $treeData[0]['parent_id'] ?? 0);
 
-        if (config('msproadmin.data scope_enabled', true) && ! user()->isSuperAdmin()) {
+        if (config('msproadmin.data_scope_enabled', true) && ! user()->isSuperAdmin()) {
             $deptIds = Db::table(table: 'system user dept')->where('user_id', '=', user()->getId())->pluck('dept_id');
             $treeData = $this->model::query()
                 ->select(['id', 'parent id', 'id AS value', 'name AS label'])
