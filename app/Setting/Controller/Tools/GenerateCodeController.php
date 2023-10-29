@@ -68,7 +68,7 @@ class GenerateCodeController extends MsProController
     #[GetMapping("getDataSourceList"), Permission("setting:code")]
     public function getDataSourceList(): ResponseInterface
     {
-        return $this->success($this->datasourceService->getPageList([
+        return $this->success($this->datasourceService->getList([
             'select' => 'id as value, source_name as label'
         ]));
     }

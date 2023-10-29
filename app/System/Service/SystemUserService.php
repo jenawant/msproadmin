@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace App\System\Service;
 
 use App\System\Mapper\SystemUserMapper;
@@ -25,7 +26,7 @@ use Psr\SimpleCache\InvalidArgumentException;
  * Class SystemUserService
  * @package App\System\Service
  */
-#[DependProxy(values: [ UserServiceInterface::class ])]
+#[DependProxy(values: [UserServiceInterface::class])]
 class SystemUserService extends AbstractService implements UserServiceInterface
 {
     /**
@@ -63,15 +64,15 @@ class SystemUserService extends AbstractService implements UserServiceInterface
      */
     public function __construct(
         ContainerInterface $container,
-        SystemUserMapper $mapper,
-        SystemMenuService $systemMenuService,
-        SystemRoleService $systemRoleService
+        SystemUserMapper   $mapper,
+        SystemMenuService  $systemMenuService,
+        SystemRoleService  $systemRoleService
     )
     {
-        $this->mapper = $mapper;
+        $this->mapper         = $mapper;
         $this->sysMenuService = $systemMenuService;
         $this->sysRoleService = $systemRoleService;
-        $this->container = $container;
+        $this->container      = $container;
     }
 
     /**
@@ -82,8 +83,8 @@ class SystemUserService extends AbstractService implements UserServiceInterface
      */
     public function getInfo(): array
     {
-        if ( ($uid = user()->getId()) ) {
-            return $this->getCacheInfo((int) $uid);
+        if (($uid = user()->getId())) {
+            return $this->getCacheInfo((int)$uid);
         }
         throw new MsProException(t('system.unable_get_userinfo'), 500);
     }
@@ -93,22 +94,23 @@ class SystemUserService extends AbstractService implements UserServiceInterface
      * @param int $id
      * @return array
      */
-    #[Cacheable(prefix: "loginInfo", ttl: 0, value: "userId_#{id}")]
+    #[Cacheable(prefix: "loginInfo", ttl: 3600 * 24 * 7, value: "userId_#{id}")]
     protected function getCacheInfo(int $id): array
     {
         $user = $this->mapper->getModel()->find($id);
         $user->addHidden('deleted_at', 'password');
         $data['user'] = $user->toArray();
         if (user()->isSuperAdmin()) {
-            $data['roles'] = ['superAdmin'];
+            $data['roles']   = ['superAdmin'];
             $data['routers'] = $this->sysMenuService->mapper->getSuperAdminRouters();
-            $data['codes'] = ['*'];
+            $data['codes']   = ['*'];
         } else {
-            $roles = $this->sysRoleService->mapper->getMenuIdsByRoleIds($user->roles()->pluck('id')->toArray());
-            $ids = $this->filterMenuIds($roles);
-            $data['roles'] = $user->roles()->pluck('code')->toArray();
+            $roles           = $this->sysRoleService->mapper->getMenuIdsByRoleIds($user->roles()->pluck('id')
+                ->toArray());
+            $ids             = $this->filterMenuIds($roles);
+            $data['roles']   = $user->roles()->pluck('code')->toArray();
             $data['routers'] = $this->sysMenuService->mapper->getRoutersByIds($ids);
-            $data['codes'] = $this->sysMenuService->mapper->getMenuCode($ids);
+            $data['codes']   = $this->sysMenuService->mapper->getMenuCode($ids);
         }
 
         return $data;
@@ -143,7 +145,7 @@ class SystemUserService extends AbstractService implements UserServiceInterface
         if ($this->mapper->existsByUsername($data['username'])) {
             throw new NormalStatusException(t('system.username_exists'));
         } else {
-            $id = $this->mapper->save($this->handleData($data));
+            $id         = $this->mapper->save($this->handleData($data));
             $data['id'] = $id;
             event(new UserAdd($data));
             return $id;
@@ -198,12 +200,12 @@ class SystemUserService extends AbstractService implements UserServiceInterface
         $redis = redis();
         $key   = sprintf('%sToken:*', config('cache.default.prefix'));
 
-        $userIds = [];
+        $userIds  = [];
         $iterator = null;
 
         while (false !== ($users = $redis->scan($iterator, $key, 100))) {
             foreach ($users as $user) {
-                if ( preg_match("/{$key}(\d+)$/", $user, $match) && isset($match[1])) {
+                if (preg_match("/{$key}(\d+)$/", $user, $match) && isset($match[1])) {
                     $userIds[] = $match[1];
                 }
             }
@@ -214,7 +216,7 @@ class SystemUserService extends AbstractService implements UserServiceInterface
             return [];
         }
 
-        return $this->getPageList(array_merge(['userIds'  => $userIds ], $params));
+        return $this->getPageList(array_merge(['userIds' => $userIds], $params));
     }
 
     /**
@@ -270,7 +272,7 @@ class SystemUserService extends AbstractService implements UserServiceInterface
     public function kickUser(string $id): bool
     {
         $redis = redis();
-        $key = sprintf("%sToken:%s", config('cache.default.prefix'), $id);
+        $key   = sprintf("%sToken:%s", config('cache.default.prefix'), $id);
         user()->getJwt()->logout($redis->get($key), 'default');
         $redis->del($key);
         return true;
@@ -296,7 +298,7 @@ class SystemUserService extends AbstractService implements UserServiceInterface
      */
     public function clearCache(string $id): bool
     {
-        $redis = redis();
+        $redis  = redis();
         $prefix = config('cache.default.prefix');
 
         $iterator = null;
@@ -321,10 +323,10 @@ class SystemUserService extends AbstractService implements UserServiceInterface
     public function setHomePage(array $params): bool
     {
         $res = ($this->mapper->getModel())::query()
-            ->where('id', $params['id'])
-            ->update(['dashboard' => $params['dashboard']]) > 0;
+                ->where('id', $params['id'])
+                ->update(['dashboard' => $params['dashboard']]) > 0;
 
-        $this->clearCache((string) $params['id']);
+        $this->clearCache((string)$params['id']);
         return $res;
     }
 
@@ -347,7 +349,7 @@ class SystemUserService extends AbstractService implements UserServiceInterface
             $model[$key] = $param;
         }
 
-        $this->clearCache((string) $model['id']);
+        $this->clearCache((string)$model['id']);
         return $model->save();
     }
 
@@ -358,7 +360,7 @@ class SystemUserService extends AbstractService implements UserServiceInterface
      */
     public function modifyPassword(array $params): bool
     {
-        return $this->mapper->initUserPassword((int) user()->getId(), $params['newPassword']);
+        return $this->mapper->initUserPassword((int)user()->getId(), $params['newPassword']);
     }
 
     /**

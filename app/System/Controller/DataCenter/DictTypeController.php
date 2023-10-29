@@ -34,6 +34,17 @@ class DictTypeController extends MsProController
     protected SystemDictTypeService $service;
 
     /**
+     * 获取字典选项列表
+     * @return ResponseInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    #[GetMapping("option"), Permission("system:dict, system:dict:index")]
+    public function option(): ResponseInterface
+    {
+        return $this->success($this->service->getList($this->request->all()));
+    }
+    /**
      * 获取字典列表
      * @return ResponseInterface
      * @throws \Psr\Container\ContainerExceptionInterface

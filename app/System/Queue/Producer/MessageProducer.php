@@ -10,7 +10,7 @@ use Hyperf\Amqp\Message\ProducerMessage;
 /**
  * 后台内部消息队列生产处理
  */
-//#[Producer(exchange: "msproadmin", routingKey: "message.routing")]
+#[Producer(exchange: "msproadmin", routingKey: "message.routing")]
 class MessageProducer extends ProducerMessage
 {
     /**

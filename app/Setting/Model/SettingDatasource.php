@@ -10,8 +10,8 @@ use MsPro\MsProModel;
  * @property int $id 主键
  * @property string $source_name 数据源名称
  * @property string $dsn 连接dsn字符串
- * @property string $username 数据库用户
- * @property string $password 数据库密码
+ * @property string $username 数据库名称
+ * @property string $password 数据库用户
  * @property int $created_by 创建者
  * @property int $updated_by 更新者
  * @property \Carbon\Carbon $created_at 创建时间
