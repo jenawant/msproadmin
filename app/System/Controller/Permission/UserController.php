@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace App\System\Controller\Permission;
 
 use App\System\Request\SystemUserRequest;
@@ -17,6 +18,7 @@ use MsPro\Annotation\Permission;
 use MsPro\Annotation\RemoteState;
 use MsPro\MsProCollection;
 use MsPro\MsProController;
+use MsPro\Office\AsyncExport;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -28,6 +30,8 @@ class UserController extends MsProController
 {
     #[Inject]
     protected SystemUserService $service;
+    #[Inject]
+    protected AsyncExport $asyncExport;
 
     /**
      * 用户列表
@@ -114,7 +118,7 @@ class UserController extends MsProController
     #[DeleteMapping("delete"), Permission("system:user:delete")]
     public function delete(): ResponseInterface
     {
-        return $this->service->delete((array) $this->request->input('ids', [])) ? $this->success() : $this->error();
+        return $this->service->delete((array)$this->request->input('ids', [])) ? $this->success() : $this->error();
     }
 
     /**
@@ -126,7 +130,7 @@ class UserController extends MsProController
     #[DeleteMapping("realDelete"), Permission("system:user:realDelete"), OperationLog]
     public function realDelete(): ResponseInterface
     {
-        return $this->service->realDelete((array) $this->request->input('ids', [])) ? $this->success() : $this->error();
+        return $this->service->realDelete((array)$this->request->input('ids', [])) ? $this->success() : $this->error();
     }
 
     /**
@@ -138,7 +142,7 @@ class UserController extends MsProController
     #[PutMapping("recovery"), Permission("system:user:recovery"), OperationLog]
     public function recovery(): ResponseInterface
     {
-        return $this->service->recovery((array) $this->request->input('ids', [])) ? $this->success() : $this->error();
+        return $this->service->recovery((array)$this->request->input('ids', [])) ? $this->success() : $this->error();
     }
 
     /**
@@ -151,7 +155,7 @@ class UserController extends MsProController
     #[PutMapping("changeStatus"), Permission("system:user:changeStatus"), OperationLog]
     public function changeStatus(SystemUserRequest $request): ResponseInterface
     {
-        return $this->service->changeStatus((int) $request->input('id'), (string) $request->input('status'))
+        return $this->service->changeStatus((int)$request->input('id'), (string)$request->input('status'))
             ? $this->success() : $this->error();
     }
 
@@ -164,7 +168,7 @@ class UserController extends MsProController
     #[PostMapping("clearCache"), Permission("system:user:cache")]
     public function clearCache(): ResponseInterface
     {
-        $this->service->clearCache((string) $this->request->input('id', null));
+        $this->service->clearCache((string)$this->request->input('id', null));
         return $this->success();
     }
 
@@ -190,7 +194,7 @@ class UserController extends MsProController
     #[PutMapping("initUserPassword"), Permission("system:user:initUserPassword"), OperationLog]
     public function initUserPassword(): ResponseInterface
     {
-        return $this->service->initUserPassword((int) $this->request->input('id')) ? $this->success() : $this->error();
+        return $this->service->initUserPassword((int)$this->request->input('id')) ? $this->success() : $this->error();
     }
 
     /**
@@ -202,7 +206,7 @@ class UserController extends MsProController
     #[PostMapping("updateInfo")]
     public function updateInfo(): ResponseInterface
     {
-        return $this->service->updateInfo(array_merge($this->request->all(), ['id' => user()->getId() ])) ? $this->success() : $this->error();
+        return $this->service->updateInfo(array_merge($this->request->all(), ['id' => user()->getId()])) ? $this->success() : $this->error();
     }
 
     /**
@@ -243,7 +247,7 @@ class UserController extends MsProController
     public function asyncExport(): ResponseInterface
     {
         $filename = 'ExportDataList-' . date('Ymd') . '-' . snowflake_id();
-        $this->service->asyncExport($this->request->all(), \App\System\Dto\UserDto::class, $filename);
+        $this->asyncExport->create(\App\System\Service\SystemUserService::class, \App\System\Dto\UserDto::class, $this->request->all(), $filename);
         return $this->success('已加入导出队列，请稍后', ['filename' => $filename]);
     }
 
@@ -258,7 +262,7 @@ class UserController extends MsProController
     #[GetMapping("asyncDownload"), Permission("system:user:export")]
     public function asyncDownload(): ResponseInterface
     {
-        return $this->service->asyncDownload($this->request->input('filename'));
+        return $this->asyncExport->download($this->request->input('filename'));
     }
 
     /**
